@@ -1,12 +1,6 @@
 from coffee_data import MENU, resources
 
 
-# TODO: Asking user
-def asking_user():
-    answer = input("What would you like? (espresso/latte/cappuccino): ")
-    return answer
-
-
 # TODO: Print Report
 def print_report(total_water, total_milk, total_coffee, total_money):
     print(f"Water: {total_water}ml")
@@ -14,14 +8,13 @@ def print_report(total_water, total_milk, total_coffee, total_money):
     print(f"Coffee: {total_coffee}g")
     print(f"Money: ${total_money}")
 
-# TODO: Turn off cofee machine
 
 # TODO: Check resources sufficient
 def enough_resources(total_water, total_milk, total_coffee, drink):
     if total_water < MENU[drink]['ingredients']['water']:
         print("Sorry there is not enough water")
         return False
-    elif total_milk < MENU[drink]['ingredients']['milk']:
+    elif drink in ('latte', 'cappuccino') and total_milk < MENU[drink]['ingredients']['milk']:
         print("Sorry there is not enough milk")
         return False
     elif total_coffee < MENU[drink]['ingredients']['coffee']:
@@ -44,7 +37,9 @@ def process_coins(drink):
     nickles *= 0.05
     pennies *= 0.01
 
-    return quarters + dimes + nickles + pennies
+    total = quarters + dimes + nickles + pennies
+    print(f"You are inserted ${total}")
+    return total
 
 
 # TODO: Check transaction successful
@@ -53,19 +48,46 @@ def transaction_successful(drink, money_inserted):
         change = round(money_inserted - MENU[drink]['cost'], 2)
         print(f"Here is {change} in change")
         return True
-    else: 
+    else:
         print("Sorry that's not enough money. Money refunded.")
         return False
 
 
 # TODO: make coffee
 def make_coffee(total_water, total_milk, total_coffee, drink):
-    total_water -= MENU[drink][]
-    
+    total_water -= MENU[drink]['ingredients']['water']
+    total_coffee -= MENU[drink]['ingredients']['coffee']
+    if drink == "latte" or drink == "cappuccino":
+        total_milk -= MENU[drink]['ingredients']['milk']
+    print(f"Here is your {drink} Enjoy!")
+    return (total_water, total_milk, total_coffee)
+
 
 total_water = resources['water']
 total_milk = resources['milk']
 total_coffee = resources['coffee']
 total_money = 0
+continue_work = True
 
-print_report(total_money)
+
+# TODO: Asking user
+while continue_work:
+    answer = input("Hello, What would you like? (espresso/latte/cappuccino): ")
+    if answer == 'report':
+        print_report(total_water, total_milk, total_coffee, total_money)
+    elif answer == 'off':
+        print("Bye.")
+        continue_work = False
+    elif answer in ('espresso', 'latte', 'cappuccino'):
+        drink = answer
+        if enough_resources(total_water, total_milk, total_coffee, drink):
+            money_inserted = process_coins(drink)
+            if transaction_successful(drink, money_inserted):
+                total_money += money_inserted
+                total_water, total_milk, total_coffee = make_coffee(
+                        total_water, total_milk, total_coffee, drink
+                    )
+            else:
+                continue
+        else:
+            continue
